@@ -130,33 +130,50 @@ pub fn draw_qr(
     ec_level: EcLevel,
     fg_color: &str,
     bg_color: &str,
+    include_xml_declaration: bool,
 ) -> String {
     let code = QrCode::with_error_correction_level(data, ec_level).unwrap();
     let colors = code.to_colors();
-    let width = code.width();
-    let height = colors.len() / code.width();
-
     let radius = 1;
+    let code_width = code.width();
+    let code_height = colors.len() / code.width();
+    let actual_width = code_width * radius * 2;
+    let actual_height = code_height * radius * 2;
 
     let mut output = Vec::new();
 
-    output.push(format!(
+    if include_xml_declaration {
+        output.push(format!(
         concat!(
             r#"<?xml version="1.0" standalone="yes"?>"#,
-            r#"<svg xmlns="http://www.w3.org/2000/svg""#,
-            r#" version="1.1" xwidth="{width}" xheight="{height}""#,
-            r#" viewBox="0 0 {width} {height}">"#,
-            r#"<rect x="0" y="0" width="{width}" height="{height}" fill="{bg_color}"/>"#,
+            r#"<svg xmlns="http://www.w3.org/2000/svg" version="1.1" viewBox="0 0 {width} {height}">"#,
         ),
-        width = width * radius * 2,
-        height = width * radius * 2,
+        width = actual_width,
+        height = actual_height,
+    ));
+    } else {
+        output.push(format!(
+        r#"<svg xmlns="http://www.w3.org/2000/svg" version="1.1" viewBox="0 0 {width} {height}">"#,
+        width = actual_width,
+        height = actual_height,
+      ));
+    }
+
+    output.push(format!(
+        r#"<rect x="0" y="0" width="{width}" height="{height}" fill="{bg_color}"/>"#,
+        width = actual_width,
+        height = actual_height,
         bg_color = bg_color
     ));
 
     if qr_kind == QrKind::Circle {
         // draw custom finder pattern for circle qrs
         output.push(draw_finder_patterns(
-            width, height, radius, &fg_color, &bg_color,
+            code_width,
+            code_height,
+            radius,
+            &fg_color,
+            &bg_color,
         ));
     }
 
@@ -171,14 +188,14 @@ pub fn draw_qr(
 
     // draw rest of qr
     for (idx, color) in colors.iter().enumerate() {
-        let col = idx % width;
-        let row = idx / width;
+        let col = idx % code_width;
+        let row = idx / code_width;
 
         if color == &Color::Dark {
             match qr_kind {
                 QrKind::Circle => {
                     // only draw finder pattern when in square mode
-                    if !is_finder_pattern(width, height, col, row) {
+                    if !is_finder_pattern(code_width, code_height, col, row) {
                         output.push(draw_circle_module_path(col, row, radius))
                     }
                 }

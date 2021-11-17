@@ -56,6 +56,7 @@ fn generate_svg(
     ec_level_atom: Atom,
     fg_color: String,
     bg_color: String,
+    include_xml_declaration: bool
 ) -> Result<String, Atom> {
     let ec_level = match atom_to_ec_level(ec_level_atom) {
         Err(e) => return Err(e),
@@ -67,7 +68,7 @@ fn generate_svg(
         Ok(ec) => ec,
     };
 
-    return Ok(qr::draw_qr(&data, qr_kind, ec_level, &fg_color, &bg_color));
+    return Ok(qr::draw_qr(&data, qr_kind, ec_level, &fg_color, &bg_color, include_xml_declaration));
 }
 
 rustler::init!("Elixir.QRCodeRust", [generate_svg]);
