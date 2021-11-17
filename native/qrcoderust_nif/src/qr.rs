@@ -50,8 +50,6 @@ fn is_finder_pattern(width: usize, height: usize, x: usize, y: usize) -> bool {
 }
 
 fn draw_finder_pattern(
-    col: usize,
-    row: usize,
     radius: usize,
     fg_color: &str,
     bg_color: &str,
@@ -62,8 +60,8 @@ fn draw_finder_pattern(
 
     output.push(format!(
         r#"<rect x="{x}" y="{y}" width="{width}" height="{height}" rx="{rx}" fill="{fill}" />"#,
-        x = col * diameter,
-        y = row * diameter,
+        x = 0,
+        y = 0,
         height = diameter * 7,
         width = diameter * 7,
         rx = radius,
@@ -72,8 +70,8 @@ fn draw_finder_pattern(
 
     output.push(format!(
         r#"<rect x="{x}" y="{y}" width="{width}" height="{height}" fill="{fill}" />"#,
-        x = (col + 1) * diameter,
-        y = (row + 1) * diameter,
+        x = 1 * diameter,
+        y = 1 * diameter,
         height = diameter * 5,
         width = diameter * 5,
         fill = bg_color
@@ -81,8 +79,8 @@ fn draw_finder_pattern(
 
     output.push(format!(
         r#"<rect x="{x}" y="{y}" width="{width}" height="{height}" rx="{rx}" fill="{fill}" />"#,
-        x = (col + 2) * diameter,
-        y = (row + 2) * diameter,
+        x = 2 * diameter,
+        y = 2 * diameter,
         height = diameter * 3,
         width = diameter * 3,
         rx = radius,
@@ -93,28 +91,26 @@ fn draw_finder_pattern(
 }
 
 fn draw_finder_patterns(
-    width: usize,
-    height: usize,
+    code_width: usize,
+    code_height: usize,
     radius: usize,
     fg_color: &str,
     bg_color: &str,
 ) -> String {
     let mut output = Vec::new();
-    output.push(draw_finder_pattern(0, 0, radius, fg_color, bg_color));
-    output.push(draw_finder_pattern(
-        width - 7,
-        0,
-        radius,
-        fg_color,
-        bg_color,
-    ));
-    output.push(draw_finder_pattern(
-        0,
-        height - 7,
-        radius,
-        fg_color,
-        bg_color,
-    ));
+
+    // define resuable finder pattern
+    output.push(r#"<defs>"#.to_string());
+    output.push(r#"<g id="f">"#.to_string());
+    output.push(draw_finder_pattern(radius, fg_color, bg_color));
+    output.push(r#"</g>"#.to_string());
+    output.push(r#"</defs>"#.to_string());
+
+    // draw paths
+    output.push(format!(r##"<use href="#f" x="{x}" y="{y}"/>"##, x = 0, y = 0));
+    output.push(format!(r##"<use href="#f" x="{x}" y="{y}"/>"##, x = (code_width - 7) * radius * 2, y = 0));
+    output.push(format!(r##"<use href="#f" x="{x}" y="{y}"/>"##, x = 0, y = (code_height - 7) * radius * 2));
+
     return output.join("\n");
 }
 
