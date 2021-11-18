@@ -1,36 +1,14 @@
 use qrcode::types::Color;
 use qrcode::{EcLevel, QrCode};
 
+#[derive(PartialEq, Eq)]
+pub enum QrKind {
+    Square,
+    Circle,
+}
+
 fn is_within(x: usize, y: usize, top_left: (usize, usize), bottom_right: (usize, usize)) -> bool {
     return x >= top_left.0 && x <= bottom_right.0 && y >= top_left.1 && y <= bottom_right.1;
-}
-
-fn draw_square_module_path(x: usize, y: usize, r: usize) -> String {
-    let diameter = r * 2;
-
-    return format!(
-        concat!("M {x}, {y}\n", "h {d} v {d} h -{d} v -{d}"),
-        x = x * diameter,
-        y = y * diameter,
-        d = diameter
-    );
-}
-
-fn draw_circle_module_path(x: usize, y: usize, r: usize) -> String {
-    let diameter = r * 2;
-    let cy = (y + 1) * diameter - r;
-
-    return format!(
-        concat!(
-            "M {x}, {cy}\n",
-            "a {r},{r} 0 1,0 {d},0\n",
-            "a {r},{r} 0 1,0 -{d},0\n",
-        ),
-        x = x * diameter,
-        d = diameter,
-        cy = cy,
-        r = r
-    );
 }
 
 fn is_finder_pattern(width: usize, height: usize, x: usize, y: usize) -> bool {
@@ -49,17 +27,13 @@ fn is_finder_pattern(width: usize, height: usize, x: usize, y: usize) -> bool {
     return is_within(x, y, a1, a2) || is_within(x, y, b1, b2) || is_within(x, y, c1, c2);
 }
 
-fn draw_finder_pattern(
-    radius: usize,
-    fg_color: &str,
-    bg_color: &str,
-) -> String {
+fn draw_finder_pattern_group(radius: usize, fg_color: &str, bg_color: &str) -> String {
     let diameter = radius * 2;
 
     let mut output = Vec::new();
 
     output.push(format!(
-        r#"<rect x="{x}" y="{y}" width="{width}" height="{height}" rx="{rx}" fill="{fill}" />"#,
+        r#"<rect x="{x}" y="{y}" width="{width}" height="{height}" rx="{rx}" fill="{fill}"/>"#,
         x = 0,
         y = 0,
         height = diameter * 7,
@@ -69,7 +43,7 @@ fn draw_finder_pattern(
     ));
 
     output.push(format!(
-        r#"<rect x="{x}" y="{y}" width="{width}" height="{height}" fill="{fill}" />"#,
+        r#"<rect x="{x}" y="{y}" width="{width}" height="{height}" fill="{fill}"/>"#,
         x = 1 * diameter,
         y = 1 * diameter,
         height = diameter * 5,
@@ -78,7 +52,7 @@ fn draw_finder_pattern(
     ));
 
     output.push(format!(
-        r#"<rect x="{x}" y="{y}" width="{width}" height="{height}" rx="{rx}" fill="{fill}" />"#,
+        r#"<rect x="{x}" y="{y}" width="{width}" height="{height}" rx="{rx}" fill="{fill}"/>"#,
         x = 2 * diameter,
         y = 2 * diameter,
         height = diameter * 3,
@@ -87,37 +61,70 @@ fn draw_finder_pattern(
         fill = fg_color
     ));
 
-    return output.join("\n");
+    return format!(r##"<g id="f">{content}</g>"##, content = output.join(""));
 }
 
-fn draw_finder_patterns(
-    code_width: usize,
-    code_height: usize,
-    radius: usize,
-    fg_color: &str,
-    bg_color: &str,
-) -> String {
+fn draw_module_group(qr_kind: &QrKind, radius: usize, fg_color: &str) -> String {
+    return match qr_kind {
+        QrKind::Circle => format!(
+            r#"<g id="m"><circle cx="{radius}" cy="{radius}" r="{radius}" fill="{fg_color}"/></g>"#,
+            radius = radius,
+            fg_color = fg_color
+        ),
+        QrKind::Square => format!(
+            r#"<g id="m"><rect x="0" y="0" width="{diameter}" height="{diameter}" fill="{fg_color}" shape-rendering="crispEdges"/></g>"#,
+            // + 0.0001 to avoid gaps between squares because of rounding errors
+            diameter = (radius * 2) as f32 + 0.0001,
+            fg_color = fg_color
+        ),
+    };
+}
+
+fn render_defs(qr_kind: &QrKind, radius: usize, fg_color: &str, bg_color: &str) -> String {
     let mut output = Vec::new();
 
-    // define resuable finder pattern
     output.push(r#"<defs>"#.to_string());
-    output.push(r#"<g id="f">"#.to_string());
-    output.push(draw_finder_pattern(radius, fg_color, bg_color));
-    output.push(r#"</g>"#.to_string());
+
+    if qr_kind == &QrKind::Circle {
+        output.push(draw_finder_pattern_group(radius, fg_color, bg_color));
+    }
+
+    output.push(draw_module_group(&qr_kind, radius, fg_color));
     output.push(r#"</defs>"#.to_string());
 
-    // draw paths
-    output.push(format!(r##"<use href="#f" x="{x}" y="{y}"/>"##, x = 0, y = 0));
-    output.push(format!(r##"<use href="#f" x="{x}" y="{y}"/>"##, x = (code_width - 7) * radius * 2, y = 0));
-    output.push(format!(r##"<use href="#f" x="{x}" y="{y}"/>"##, x = 0, y = (code_height - 7) * radius * 2));
-
-    return output.join("\n");
+    return output.join("");
 }
 
-#[derive(PartialEq, Eq)]
-pub enum QrKind {
-    Square,
-    Circle,
+fn draw_finder_patterns(code_width: usize, code_height: usize, radius: usize) -> String {
+    let mut output = Vec::new();
+
+    output.push(format!(
+        r##"<use href="#f" x="{x}" y="{y}"/>"##,
+        x = 0,
+        y = 0
+    ));
+
+    output.push(format!(
+        r##"<use href="#f" x="{x}" y="{y}"/>"##,
+        x = (code_width - 7) * radius * 2,
+        y = 0
+    ));
+
+    output.push(format!(
+        r##"<use href="#f" x="{x}" y="{y}"/>"##,
+        x = 0,
+        y = (code_height - 7) * radius * 2
+    ));
+
+    return output.join("");
+}
+
+fn draw_module(col: usize, row: usize, radius: usize) -> String {
+    return format!(
+        r##"<use href="#m" x="{x}" y="{y}"/>"##,
+        x = col * radius * 2,
+        y = row * radius * 2
+    );
 }
 
 pub fn draw_qr(
@@ -133,8 +140,8 @@ pub fn draw_qr(
     let radius = 1;
     let code_width = code.width();
     let code_height = colors.len() / code.width();
-    let actual_width = code_width * radius * 2;
-    let actual_height = code_height * radius * 2;
+    let width = code_width * radius * 2;
+    let height = code_height * radius * 2;
 
     let mut output = Vec::new();
 
@@ -144,43 +151,31 @@ pub fn draw_qr(
             r#"<?xml version="1.0" standalone="yes"?>"#,
             r#"<svg xmlns="http://www.w3.org/2000/svg" version="1.1" viewBox="0 0 {width} {height}">"#,
         ),
-        width = actual_width,
-        height = actual_height,
+        width = width,
+        height = height,
     ));
     } else {
         output.push(format!(
         r#"<svg xmlns="http://www.w3.org/2000/svg" version="1.1" viewBox="0 0 {width} {height}">"#,
-        width = actual_width,
-        height = actual_height,
+        width = width,
+        height = height,
       ));
     }
 
+    output.push(render_defs(&qr_kind, radius, fg_color, bg_color));
+
+    // draw background
     output.push(format!(
         r#"<rect x="0" y="0" width="{width}" height="{height}" fill="{bg_color}"/>"#,
-        width = actual_width,
-        height = actual_height,
+        width = width,
+        height = height,
         bg_color = bg_color
     ));
 
+    // draw custom finder pattern for circle qrs
     if qr_kind == QrKind::Circle {
-        // draw custom finder pattern for circle qrs
-        output.push(draw_finder_patterns(
-            code_width,
-            code_height,
-            radius,
-            &fg_color,
-            &bg_color,
-        ));
+        output.push(draw_finder_patterns(code_width, code_height, radius));
     }
-
-    output.push(format!(
-        r#"<path fill="{fg_color}" {additional_atrs} d=""#,
-        fg_color = fg_color,
-        additional_atrs = match qr_kind {
-            QrKind::Square => r#"shape-rendering="crispEdges""#,
-            QrKind::Circle => "",
-        }
-    ));
 
     // draw rest of qr
     for (idx, color) in colors.iter().enumerate() {
@@ -188,19 +183,15 @@ pub fn draw_qr(
         let row = idx / code_width;
 
         if color == &Color::Dark {
-            match qr_kind {
-                QrKind::Circle => {
-                    // only draw finder pattern when in square mode
-                    if !is_finder_pattern(code_width, code_height, col, row) {
-                        output.push(draw_circle_module_path(col, row, radius))
-                    }
-                }
-
-                QrKind::Square => output.push(draw_square_module_path(col, row, radius)),
+            // skip finder pattern for circle qr
+            if qr_kind == QrKind::Circle && is_finder_pattern(code_width, code_height, col, row) {
+                continue;
             }
+
+            output.push(draw_module(col, row, radius));
         }
     }
 
-    output.push("\"/></svg>".to_string());
-    return output.join("\n");
+    output.push("</svg>".to_string());
+    return output.join("");
 }
