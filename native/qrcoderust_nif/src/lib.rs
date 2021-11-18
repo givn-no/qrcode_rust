@@ -45,11 +45,6 @@ fn atom_to_qr_kind(atom: Atom) -> Result<QrKind, Atom> {
 }
 
 #[rustler::nif]
-fn foo() -> String {
-    return "foo".to_string();
-}
-
-#[rustler::nif]
 fn generate_svg(
     data: String,
     qr_kind_atom: Atom,
