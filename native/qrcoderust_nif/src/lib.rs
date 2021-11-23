@@ -69,6 +69,7 @@ fn generate_svg(
         ec_level,
         &fg_color,
         &bg_color,
+        &0,
         include_xml_declaration,
     ));
 }
