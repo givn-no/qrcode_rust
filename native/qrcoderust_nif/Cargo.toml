@@ -15,8 +15,11 @@ rustler = "0.22.2"
 qrcode = { version = "0.11", default-features = false }
 
 [dev-dependencies]
-bardecoder = "0.3.0"
 image = "0.23"
 resvg = "0.19.0"
 usvg = "0.19.0"
 tiny-skia = "0.6.1"
+quircs = "0.10.0"
+
+[profile.test]
+opt-level = 3
