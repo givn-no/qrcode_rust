@@ -112,8 +112,8 @@ fn draw_module_group(qr_kind: &QrKind, radius: usize, fg_color: &str) -> String 
         ),
         QrKind::Square => format!(
             r#"<g id="m"><rect x="0" y="0" width="{diameter}" height="{diameter}" fill="{fg_color}" shape-rendering="crispEdges"/></g>"#,
-            // + 0.0001 to avoid gaps between squares because of rounding errors
-            diameter = (radius * 2) as f32 + 0.0001,
+            // + 0.1 to avoid gaps between squares because of rounding errors
+            diameter = (radius * 2) as f32 + 0.1,
             fg_color = fg_color
         ),
     };
