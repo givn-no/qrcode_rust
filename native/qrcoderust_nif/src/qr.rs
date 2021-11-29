@@ -40,8 +40,8 @@ fn is_finder_pattern(code_width: usize, x: usize, y: usize) -> bool {
     // top left finder pattern
     let top_left_finder = Square {
         x1: 0,
-        x2: 0,
-        y1: 6,
+        x2: 6,
+        y1: 0,
         y2: 6,
     };
 
