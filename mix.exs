@@ -5,7 +5,7 @@ defmodule QrcodeRust.MixProject do
     [
       app: :qrcode_rust,
       version: "0.1.0",
-      elixir: "~> 1.12",
+      elixir: "~> 1.13",
       start_permanent: Mix.env() == :prod,
       deps: deps()
     ]
@@ -21,7 +21,7 @@ defmodule QrcodeRust.MixProject do
   # Run "mix help deps" to learn about dependencies.
   defp deps do
     [
-      {:rustler, "~> 0.22.2"}
+      {:rustler, "~> 0.25.0"}
     ]
   end
 end
