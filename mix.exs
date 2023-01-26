@@ -2,7 +2,7 @@ defmodule QrcodeRust.MixProject do
   use Mix.Project
 
   @source_url "https://github.com/hooplab/qrcode_rust"
-  @version "0.2.0"
+  @version "0.2.1"
 
   def project do
     [
@@ -11,6 +11,12 @@ defmodule QrcodeRust.MixProject do
       elixir: "~> 1.13",
       start_permanent: Mix.env() == :prod,
       deps: deps(),
+      package: package()
+    ]
+  end
+
+  defp package do
+    [
       links: %{"GitHub" => @source_url}
     ]
   end

@@ -514,7 +514,7 @@ dependencies = [
 
 [[package]]
 name = "qrcoderust_nif"
-version = "0.2.0"
+version = "0.2.1"
 dependencies = [
  "image",
  "qrcode",
