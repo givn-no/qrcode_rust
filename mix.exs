@@ -17,6 +17,14 @@ defmodule QrcodeRust.MixProject do
 
   defp package do
     [
+      files: [
+        "lib",
+        "native/qrcoderust_nif/.cargo",
+        "native/qrcoderust_nif/src",
+        "native/qrcoderust_nif/Cargo*",
+        "checksum-*.exs",
+        "mix.exs"
+      ],
       links: %{"GitHub" => @source_url}
     ]
   end
