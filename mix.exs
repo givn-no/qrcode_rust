@@ -39,8 +39,8 @@ defmodule QrcodeRust.MixProject do
   # Run "mix help deps" to learn about dependencies.
   defp deps do
     [
-      {:rustler_precompiled, "~> 0.5"},
-      {:rustler, ">= 0.0.0", optional: true}
+      {:rustler_precompiled, "~> 0.7"},
+      {:rustler, "~> 0.30.0", optional: true}
     ]
   end
 end
