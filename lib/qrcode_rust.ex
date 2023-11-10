@@ -21,7 +21,8 @@ defmodule QRCodeRust do
     base_url: "#{github_url}/releases/download/v#{version}",
     force_build: System.get_env("QRCODE_RUST_BUILD") in ["1", "true"],
     version: version,
-    targets: targets
+    targets: targets,
+    nif_versions: ["2.14", "2.15", "2.16"]
 
   def generate_svg(data, qr_kind \\ :square, ec_level \\ :ec_l, fg_color \\ "#000", bg_color \\ "#fff", remove_middle \\ false, include_xml_declaration \\ false, min_version \\ nil)
 
