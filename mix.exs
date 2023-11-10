@@ -1,8 +1,8 @@
 defmodule QrcodeRust.MixProject do
   use Mix.Project
 
-  @source_url "https://github.com/hooplab/qrcode_rust"
-  @version "0.2.1"
+  @source_url "https://github.com/givn-no/qrcode_rust"
+  @version "0.3.0"
 
   def project do
     [
