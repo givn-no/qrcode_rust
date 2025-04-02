@@ -2,7 +2,7 @@ defmodule QrcodeRust.MixProject do
   use Mix.Project
 
   @source_url "https://github.com/givn-no/qrcode_rust"
-  @version "0.3.0"
+  @version "0.4.0"
 
   def project do
     [
@@ -42,8 +42,8 @@ defmodule QrcodeRust.MixProject do
   # Run "mix help deps" to learn about dependencies.
   defp deps do
     [
-      {:rustler_precompiled, "~> 0.6"},
-      {:rustler, "~> 0.30.0", optional: true}
+      {:rustler_precompiled, "~> 0.8"},
+      {:rustler, ">= 0.0.0", optional: true}
     ]
   end
 
