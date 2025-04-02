@@ -103,4 +103,4 @@ fn generate_svg(
     };
 }
 
-rustler::init!("Elixir.QRCodeRust", [generate_svg]);
+rustler::init!("Elixir.QRCodeRust");
