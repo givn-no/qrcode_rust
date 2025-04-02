@@ -42,7 +42,7 @@ defmodule QrcodeRust.MixProject do
   # Run "mix help deps" to learn about dependencies.
   defp deps do
     [
-      {:rustler_precompiled, "~> 0.8"},
+      {:rustler_precompiled, ">= 0.0.0"},
       {:rustler, ">= 0.0.0", optional: true}
     ]
   end
