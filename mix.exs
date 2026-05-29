@@ -30,6 +30,11 @@ defmodule QrcodeRust.MixProject do
       links: %{"GitHub" => @source_url},
       licenses: ["MIT"]
     ]
+    |> maybe_put_organization()
+  end
+
+  defp maybe_put_organization(package) do
+    maybe_put_env(package, :organization, "HEX_ORGANIZATION")
   end
 
   # Run "mix help compile.app" to learn about applications.
@@ -48,9 +53,18 @@ defmodule QrcodeRust.MixProject do
   end
 
   defp hex do
-    [
-      api_url: System.get_env("HEX_API_URL"),
-      api_key: System.get_env("HEX_API_KEY")
-    ]
+    []
+    |> maybe_put_env(:api_url, "HEX_API_URL")
+    |> maybe_put_env(:api_key, "HEX_API_KEY")
+  end
+
+  defp maybe_put_env(config, key, env_var) do
+    case System.get_env(env_var) do
+      value when is_binary(value) and value != "" ->
+        Keyword.put(config, key, value)
+
+      _ ->
+        config
+    end
   end
 end
