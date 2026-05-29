@@ -2,7 +2,7 @@ defmodule QrcodeRust.MixProject do
   use Mix.Project
 
   @source_url "https://github.com/givn-no/qrcode_rust"
-  @version "0.4.1"
+  @version "0.4.3"
 
   def project do
     [
