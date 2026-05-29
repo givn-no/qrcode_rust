@@ -97,7 +97,6 @@ jobs:
     if: startsWith(github.ref, 'refs/tags/')
     env:
       HEX_API_KEY: ${{ secrets.HEX_API_KEY }}
-      HEX_API_URL: ${{ vars.HEX_API_URL || secrets.HEX_API_URL }}
       HEX_ORGANIZATION: ${{ vars.HEX_ORGANIZATION || secrets.HEX_ORGANIZATION }}
       MIX_ENV: prod
 
